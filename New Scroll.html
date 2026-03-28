@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Universe, Malaika 🌌</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --neon-pink: #ff007f;
+            --deep-purple: #12001b;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--deep-purple);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        /* Magical Background */
+        canvas { position: absolute; top: 0; left: 0; z-index: -2; }
+        
+        /* Cursor Trail Hearts */
+        .cursor-heart {
+            position: absolute; pointer-events: none;
+            color: var(--neon-pink); font-size: 20px;
+            animation: floatUp 1s ease-out forwards; z-index: 100;
+        }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-50px) scale(1.5); opacity: 0; } }
+
+        /* Container Glassmorphism */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px; text-align: center;
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.2), inset 0 0 20px rgba(255,255,255,0.05);
+            max-width: 500px; width: 90%;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .hidden { opacity: 0; pointer-events: none; position: absolute; transform: scale(0.8) translateY(20px); }
+        .active { opacity: 1; pointer-events: auto; position: relative; transform: scale(1) translateY(0); }
+
+        h1, h2, .cursive { font-family: 'Dancing Script', cursive; color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+        h1 { font-size: 3.5rem; margin-bottom: 10px; }
+
+        /* Step 1: Loading Screen */
+        .loader-bar { width: 100%; height: 5px; background: #333; border-radius: 5px; margin-top: 20px; overflow: hidden; }
+        .loader-fill { height: 100%; background: var(--neon-pink); width: 0%; box-shadow: 0 0 15px var(--neon-pink); transition: width 0.1s; }
+
+        /* 3D Hover Cards */
+        .card-container { display: flex; justify-content: center; perspective: 1000px; margin: 30px 0; }
+        .card-3d {
+            width: 250px; height: 350px;
+            background: linear-gradient(135deg, rgba(255,0,127,0.3), rgba(18,0,27,0.8));
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px; font-size: 1.2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            transform-style: preserve-3d; transition: transform 0.1s;
+            cursor: pointer; position: relative;
+        }
+        .card-3d p { transform: translateZ(50px); text-shadow: 0 5px 10px rgba(0,0,0,0.5); }
+
+        /* The Envelope Animation */
+        .envelope-wrapper { position: relative; width: 300px; height: 200px; margin: 40px auto; cursor: pointer; }
+        .envelope {
+            position: absolute; width: 100%; height: 100%;
+            background: #800f2f; border-radius: 0 0 10px 10px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
+        }
+        .envelope::before { /* The flap */
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 150px solid transparent; border-right: 150px solid transparent;
+            border-top: 100px solid #a01a3f;
+            transform-origin: top; transition: transform 0.8s; z-index: 3;
+        }
+        .envelope.open::before { transform: rotateX(180deg); z-index: 1; }
+        
+        .letter {
+            position: absolute; bottom: 0; left: 5%; width: 90%; height: 90%;
+            background: #fff0f3; color: #333; padding: 20px; border-radius: 10px;
+            font-size: 0.9rem; text-align: left; transition: all 1s ease; z-index: 2;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2); overflow: hidden;
+        }
+        .envelope.open .letter { transform: translateY(-150px); height: 350px; overflow-y: auto; z-index: 4; }
+
+        /* Glowing Buttons */
+        .cyber-btn {
+            background: transparent; border: 2px solid var(--neon-pink);
+            color: white; padding: 12px 30px; font-size: 1.1rem; font-family: 'Poppins';
+            border-radius: 30px; cursor: pointer; position: relative; overflow: hidden;
+            transition: 0.3s; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px;
+            box-shadow: 0 0 10px var(--neon-pink), inset 0 0 10px var(--neon-pink);
+        }
+        .cyber-btn:hover { background: var(--neon-pink); color: white; box-shadow: 0 0 30px var(--neon-pink); }
+    </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div id="stage0" class="glass-panel active">
+    <h2>System Booting...</h2>
+    <p style="font-family: monospace; color: #ff85c0; margin-top: 10px;" id="load-text">Compiling Love for Malaika... 0%</p>
+    <div class="loader-bar"><div class="loader-fill" id="l-fill"></div></div>
+</div>
+
+<div id="stage1" class="glass-panel hidden">
+    <h1>Hello, Malaika ✨</h1>
+    <p>19 saal pehle, duniya thori aur khoobsurat ho gayi thi. <br>Kyunki tum aayi thi...</p>
+    <button class="cyber-btn" onclick="next(1,2)">Unlock Magic</button>
+</div>
+
+<div id="stage2" class="glass-panel hidden">
+    <h2 style="font-size: 2.5rem;">Touch The Card</h2>
+    <p>Move your finger/mouse over it</p>
+    <div class="card-container">
+        <div class="card-3d" id="tilt-card" onclick="next(2,3)">
+            <p class="cursive" style="font-size: 2.5rem; margin-bottom:10px;">19th</p>
+            <p style="font-size: 1rem;">Happy Birthday, My Queen!<br><br><span style="font-size: 0.8rem; color:#aaa;">(Click to continue)</span></p>
+        </div>
+    </div>
+</div>
+
+<div id="stage3" class="glass-panel hidden" style="max-width: 600px;">
+    <h2>A Letter For You</h2>
+    <p>Tap the envelope to open my heart...</p>
+    
+    <div class="envelope-wrapper" onclick="openEnvelope()">
+        <div class="envelope" id="env">
+            <div class="letter">
+                <strong style="color: #ff007f; font-family: 'Dancing Script'; font-size: 1.8rem;">Meri Jaan, Malaika,</strong><br><br>
+                Happy 19th Birthday! 🎂 Zindagi ka sab se haseen tohfa tum ho mere liye. Jab tum hansti ho, toh lagta hai waqt wahin thehar gaya hai.<br><br>
+                Main yeh code din raat baith kar sirf isliye likh raha tha taake main tumhe bata sakun ke tum mere liye kitni khaas ho. Tumhari aankhein, tumhari baatein, tumhari har ada mujhe deewana banati hai.<br><br>
+                Mera wada hai, chahe haalat jaise bhi hon, main humesha tumhare saath khara rahunga. Tum meri Malaika (Angel) ho, aur main tumhe hamesha Rani bana kar rakhunga.<br><br>
+                <strong>I love you, infinitely. ❤️</strong>
+            </div>
+        </div>
+    </div>
+    
+    <button class="cyber-btn hidden" id="final-btn" style="margin-top: 150px;" onclick="next(3,4)">Accept My Love</button>
+</div>
+
+<div id="stage4" class="glass-panel hidden">
+    <h1 style="font-size: 4rem;">💖</h1>
+    <h1>Happy Birthday!</h1>
+    <p class="cursive" style="font-size: 2rem;">Malaika Malik</p>
+    <p style="margin-top: 20px;">May your 19th year be as flawless and beautiful as you are.</p>
+</div>
+
+<script>
+    // --- 1. Fake Hacker Loader ---
+    let progress = 0;
+    const loadInt = setInterval(() => {
+        progress += Math.floor(Math.random() * 5) + 1;
+        if(progress >= 100) {
+            progress = 100;
+            clearInterval(loadInt);
+            setTimeout(() => next(0,1), 500);
+        }
+        document.getElementById('l-fill').style.width = progress + "%";
+        document.getElementById('load-text').innerText = "Compiling Love for Malaika... " + progress + "%";
+    }, 100);
+
+    // --- 2. Stage Navigation ---
+    function next(curr, nxt) {
+        document.getElementById('stage' + curr).classList.remove('active');
+        document.getElementById('stage' + curr).classList.add('hidden');
+        setTimeout(() => {
+            document.getElementById('stage' + nxt).classList.remove('hidden');
+            document.getElementById('stage' + nxt).classList.add('active');
+        }, 500);
+    }
+
+    // --- 3. Magical Mouse Trail (Hearts) ---
+    document.addEventListener('mousemove', function(e) {
+        if(Math.random() > 0.8) return; // Don't create too many
+        const heart = document.createElement('div');
+        heart.className = 'cursor-heart';
+        heart.innerText = ['💖','✨','🌸'][Math.floor(Math.random()*3)];
+        heart.style.left = e.pageX + 'px';
+        heart.style.top = e.pageY + 'px';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1000);
+    });
+
+    // --- 4. 3D Card Hover Math ---
+    const card = document.getElementById('tilt-card');
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -20; // Max 20deg tilt
+        const rotateY = ((x - centerX) / centerX) * 20;
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+    });
+
+    // --- 5. Envelope Open Logic ---
+    function openEnvelope() {
+        document.getElementById('env').classList.add('open');
+        setTimeout(() => {
+            document.getElementById('final-btn').classList.remove('hidden');
+        }, 1500);
+    }
+
+    // --- 6. Advanced Background Canvas ---
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    let particles = [];
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 1;
+            this.speedY = Math.random() * 1 + 0.5;
+            this.alpha = Math.random() * 0.5 + 0.2;
+        }
+        draw() {
+            ctx.fillStyle = `rgba(255, 0, 127, ${this.alpha})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        update() {
+            this.y -= this.speedY;
+            if (this.y < 0) {
+                this.y = canvas.height;
+                this.x = Math.random() * canvas.width;
+            }
+        }
+    }
+    for(let i=0; i<150; i++) particles.push(new Particle());
+
+    function animateBg() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animateBg);
+    }
+    animateBg();
+    
+    // Resize handling
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+</script>
+
+</body>
+</html>
